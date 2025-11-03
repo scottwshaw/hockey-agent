@@ -1,0 +1,27 @@
+# Web scraping
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+selenium>=4.15.0
+webdriver-manager>=4.0.0
+python-dateutil>=2.8.0
+
+# Scheduling & monitoring
+APScheduler>=3.10.0
+
+# Notifications (uncomment what you need)
+# sendgrid>=6.11.0  # Email via SendGrid
+twilio>=8.0.0  # SMS notifications
+# python-telegram-bot>=20.0  # Telegram bot
+
+# Configuration
+python-dotenv>=1.0.0
+
+# Data storage (for tracking seen sessions)
+# tinydb>=4.8.0  # Simple JSON database
+# sqlalchemy>=2.0.0  # If you prefer SQL
+
+# Development dependencies
+pytest>=7.0.0
+black>=23.0.0
+ruff>=0.1.0
