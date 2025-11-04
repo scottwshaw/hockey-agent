@@ -6,7 +6,7 @@ from typing import List, Dict
 from hockey_agent.config import SITES_TO_MONITOR
 from hockey_agent.storage import get_session_status, update_session_status, status_changed
 from hockey_agent.notifier import send_notification
-from hockey_agent.scrapers.icehq import scrape_icehq
+from hockey_agent.scrapers.icehq_playwright import scrape_icehq
 from hockey_agent.booked import is_booked
 
 logger = logging.getLogger(__name__)

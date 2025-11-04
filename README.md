@@ -2,6 +2,8 @@
 
 A Python agent that periodically monitors hockey rink websites for new scrimmages and stick & puck sessions. Currently configured for **IceHQ Melbourne** (icehq.com.au).
 
+**Run locally OR deploy to AWS Lambda!** ☁️
+
 ## Features
 
 - **Smart monitoring**: Tracks session availability status, not just new sessions
@@ -9,24 +11,70 @@ A Python agent that periodically monitors hockey rink websites for new scrimmage
 - **Day filtering**: Only monitor specific days of the week you care about
 - **Session type filtering**: Choose which session types to track (stick & puck, scrimmage, etc.)
 - **Booked session tracking**: Won't notify you about sessions you've already booked
-- **Selenium-powered**: Handles JavaScript-rendered content and dynamic dropdowns
+- **Playwright-powered**: Fast, reliable browser automation that works locally and in AWS Lambda
 - **Configurable check intervals**: Set how often to check (recommended: 15-30 minutes)
-- **Multiple notification options**: Console, email, or Telegram
+- **SMS notifications via Twilio**: Get texted when spots open up!
+- **AWS Lambda ready**: Deploy to the cloud for ~$0/month (plus SMS costs)
 - **Status tracking**: JSON-based storage tracks session availability over time
 
 ## How It Works
 
 The agent:
-1. Uses Selenium to load the IceHQ page and wait for JavaScript to render
-2. Finds all dropdown menus for session bookings
-3. Extracts all date/time options from each dropdown
+1. Uses Playwright to load the IceHQ page and wait for JavaScript to render
+2. Finds all product blocks with session data
+3. Extracts JSON data containing session dates, times, and inventory status
 4. Checks if sessions match your day/date filters
 5. Filters out sessions you've already booked
-6. Detects "SOLD OUT" text in dropdown options
+6. Detects sold-out status from inventory data (soldOut field)
 7. Compares current status with previous status in storage
-8. Notifies you when:
+8. Sends you an SMS notification when:
    - New sessions appear with availability
-   - Previously sold-out sessions become available again
+   - Previously sold-out sessions become available again (someone dropped out!)
+
+## Quick Start
+
+Choose how you want to run it:
+
+### Option A: Run Locally (Traditional)
+
+Best for: Testing, development, or if you prefer running on your own computer
+
+```bash
+# Install and run
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+playwright install chromium
+
+# Configure (see Setup below)
+cp .env.example .env
+# Edit .env with your settings
+
+# Run once to test
+python test_scraper.py
+
+# Run continuously (checks every 30 min)
+python main.py
+```
+
+### Option B: Deploy to AWS Lambda (Recommended)
+
+Best for: Set-it-and-forget-it automation, no computer needed, essentially free
+
+```bash
+# One-command deployment
+./deploy.sh
+
+# Or follow the detailed guide
+See LAMBDA_DEPLOYMENT.md for full instructions
+```
+
+**Why Lambda?**
+- Runs in the cloud 24/7
+- No computer needed
+- ~$0/month (within free tier)
+- Only pay for SMS (~$0.01 each)
+- Auto-scales, always reliable
 
 ## Setup
 

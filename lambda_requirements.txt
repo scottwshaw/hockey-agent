@@ -1,0 +1,17 @@
+# Lambda-specific requirements
+# These will be packaged with your Lambda function
+
+# Playwright for AWS Lambda (lighter than regular playwright)
+playwright-aws-lambda>=0.2.0
+
+# Date parsing
+python-dateutil>=2.8.0
+
+# Twilio for SMS notifications
+twilio>=8.0.0
+
+# Configuration
+python-dotenv>=1.0.0
+
+# Note: APScheduler is NOT needed for Lambda (EventBridge handles scheduling)
+# Note: requests, beautifulsoup4, lxml are not needed if only using Playwright

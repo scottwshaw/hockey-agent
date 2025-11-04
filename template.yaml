@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Hockey Agent - Automated session checker
+
+Globals:
+  Function:
+    Timeout: 120
+    MemorySize: 1024
+    Runtime: python3.9
+
+Parameters:
+  CheckIntervalMinutes:
+    Type: Number
+    Default: 30
+    Description: How often to check for new sessions (in minutes)
+
+  MonitorDays:
+    Type: String
+    Default: "5,6"
+    Description: Days of week to monitor (0=Mon, 6=Sun)
+
+  MonitorDates:
+    Type: String
+    Default: "2025-11-04"
+    Description: Specific dates to monitor (comma-separated)
+
+  MonitorSessionTypes:
+    Type: String
+    Default: "stick & puck,scrimmage"
+    Description: Session types to monitor
+
+  TwilioAccountSid:
+    Type: String
+    Description: Twilio Account SID
+    NoEcho: true
+
+  TwilioApiKey:
+    Type: String
+    Description: Twilio API Key SID
+    NoEcho: true
+
+  TwilioApiSecret:
+    Type: String
+    Description: Twilio API Secret
+    NoEcho: true
+
+  TwilioFromPhone:
+    Type: String
+    Description: Twilio phone number (e.g. +12025551234)
+
+  TwilioToPhone:
+    Type: String
+    Description: Your phone number to receive SMS (e.g. +61402653576)
+
+Resources:
+  HockeyAgentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: hockey-agent-checker
+      CodeUri: .
+      Handler: lambda_handler.lambda_handler
+      Description: Checks hockey websites for available sessions
+      Environment:
+        Variables:
+          NOTIFICATION_METHOD: sms
+          MONITOR_DAYS: !Ref MonitorDays
+          MONITOR_DATES: !Ref MonitorDates
+          MONITOR_SESSION_TYPES: !Ref MonitorSessionTypes
+          HEADLESS_BROWSER: "true"
+          BROWSER_WAIT_TIME: "30"
+          TWILIO_ACCOUNT_SID: !Ref TwilioAccountSid
+          TWILIO_API_KEY: !Ref TwilioApiKey
+          TWILIO_API_SECRET: !Ref TwilioApiSecret
+          TWILIO_FROM_PHONE: !Ref TwilioFromPhone
+          TWILIO_TO_PHONE: !Ref TwilioToPhone
+          STORAGE_FILE: /tmp/seen_sessions.json
+          BOOKED_SESSIONS_FILE: /tmp/booked_sessions.json
+      Layers:
+        # Using a pre-built Playwright layer for Lambda
+        # You'll need to create/use a Playwright Lambda layer
+        # See: https://github.com/microsoft/playwright/issues/14447
+        - !Sub "arn:aws:lambda:${AWS::Region}:753240598075:layer:LambdaAdapterLayerX86:17"
+      Events:
+        ScheduledCheck:
+          Type: Schedule
+          Properties:
+            Schedule: !Sub "rate(${CheckIntervalMinutes} minutes)"
+            Description: Trigger hockey session check
+            Enabled: true
+
+  HockeyAgentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${HockeyAgentFunction}"
+      RetentionInDays: 7
+
+Outputs:
+  HockeyAgentFunctionArn:
+    Description: Hockey Agent Lambda Function ARN
+    Value: !GetAtt HockeyAgentFunction.Arn
+
+  HockeyAgentFunctionName:
+    Description: Hockey Agent Lambda Function Name
+    Value: !Ref HockeyAgentFunction
